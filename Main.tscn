@@ -1,0 +1,134 @@
+[gd_scene load_steps=13 format=3 uid="uid://dkdc17iqihoao"]
+
+[ext_resource type="Script" path="res://Main.gd" id="1_dclig"]
+[ext_resource type="PackedScene" uid="uid://dfh5ubk0ls4dg" path="res://Player.tscn" id="1_dmgku"]
+[ext_resource type="PackedScene" uid="uid://c1je3pdtxdi78" path="res://Mob.tscn" id="2_fgj3d"]
+[ext_resource type="Script" path="res://HUD.gd" id="4_ng510"]
+[ext_resource type="FontFile" uid="uid://67kemc3dhsjx" path="res://fonts/Xolonium-Regular.ttf" id="5_d8k1r"]
+[ext_resource type="AudioStream" uid="uid://cr0qlr8u2h48x" path="res://art/House In a Forest Loop.ogg" id="6_r0m6w"]
+[ext_resource type="AudioStream" uid="uid://csbns0ue823nl" path="res://art/gameover.wav" id="7_ptbih"]
+
+[sub_resource type="Curve2D" id="Curve2D_mrp5m"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 480, 0, 0, 0, 0, 0, 480, 720, 0, 0, 0, 0, 0, 720, 0, 0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="InputEventJoypadButton" id="InputEventJoypadButton_i0lsq"]
+button_index = 6
+pressed = true
+
+[sub_resource type="InputEventKey" id="InputEventKey_daiuc"]
+device = -1
+keycode = 32
+unicode = 32
+
+[sub_resource type="InputEventKey" id="InputEventKey_n2h3r"]
+device = -1
+keycode = 4194309
+
+[sub_resource type="Shortcut" id="Shortcut_7midp"]
+events = [SubResource("InputEventJoypadButton_i0lsq"), SubResource("InputEventKey_daiuc"), SubResource("InputEventKey_n2h3r")]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_dclig")
+mob_scene = ExtResource("2_fgj3d")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.403922, 0.403922, 1)
+
+[node name="Player" parent="." instance=ExtResource("1_dmgku")]
+
+[node name="MobTimer" type="Timer" parent="."]
+wait_time = 0.5
+
+[node name="ScoreTimer" type="Timer" parent="."]
+
+[node name="StartTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="StartPosition" type="Marker2D" parent="."]
+position = Vector2(240, 450)
+
+[node name="MobPath" type="Path2D" parent="."]
+curve = SubResource("Curve2D_mrp5m")
+
+[node name="MobSpawnLocation" type="PathFollow2D" parent="MobPath"]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("4_ng510")
+
+[node name="ScoreLabel" type="Label" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -22.5
+offset_right = 22.5
+offset_bottom = 81.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("5_d8k1r")
+theme_override_font_sizes/font_size = 64
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -174.0
+offset_top = -81.0
+offset_right = 174.0
+offset_bottom = 81.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("5_d8k1r")
+theme_override_font_sizes/font_size = 64
+text = "Dodge the
+Creeps!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="StartButton" type="Button" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -88.5
+offset_top = -140.0
+offset_right = 88.5
+offset_bottom = -54.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("5_d8k1r")
+theme_override_font_sizes/font_size = 64
+shortcut = SubResource("Shortcut_7midp")
+text = "Start"
+
+[node name="MessageTimer" type="Timer" parent="HUD"]
+wait_time = 2.0
+one_shot = true
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_r0m6w")
+
+[node name="DeathSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("7_ptbih")
+
+[connection signal="hit" from="Player" to="." method="game_over"]
+[connection signal="timeout" from="MobTimer" to="." method="_on_mob_timer_timeout"]
+[connection signal="timeout" from="ScoreTimer" to="." method="_on_score_timer_timeout"]
+[connection signal="timeout" from="StartTimer" to="." method="_on_start_timer_timeout"]
+[connection signal="start_game" from="HUD" to="." method="new_game"]
+[connection signal="pressed" from="HUD/StartButton" to="HUD" method="_on_start_button_pressed"]
+[connection signal="timeout" from="HUD/MessageTimer" to="HUD" method="_on_message_timer_timeout"]
